@@ -1,0 +1,22 @@
+{
+  "unit_tests_passed": 6,
+  "unit_tests_skipped": 1,
+  "skip_reason": "Dataset-dependent integration test; full data audit and actual training checked separately",
+  "training_smoke": {
+    "device": "cpu",
+    "real_dino": true,
+    "real_hdf5": true,
+    "micro_batch": 1,
+    "stage1_updates": 1,
+    "frozen_continuation_updates": 1,
+    "policy_updates": 1,
+    "frozen_selector_tensors_exact": 154,
+    "stage1_transfer_tensors_exact": 418
+  },
+  "original_20k_checkpoint_tensor_names_and_shapes_match": true,
+  "shell_syntax": "passed",
+  "python_compile": "passed",
+  "simulator_rollout": "Not rerun from this extracted release",
+  "fresh_environment_install": "Not executed; tests used the existing training environment",
+  "wheel_build": "passed (no dependency installation)"
+}

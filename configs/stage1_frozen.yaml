@@ -1,0 +1,3 @@
+extends: stage1.yaml
+train:
+  stage1_freeze_selector_at_step: 10000

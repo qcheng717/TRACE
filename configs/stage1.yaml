@@ -1,0 +1,166 @@
+model:
+  backbone:
+    name: dinov2
+    pretrained_path: models/dinov2-base
+    candidate_layers:
+    - 2
+    - 5
+    - 8
+    - 11
+    mode: frozen
+    unfreeze_last: 2
+    frame_batch_size: 16
+    image_size:
+    - 240
+    - 320
+    pad_to_patch: true
+  policy:
+    type: diffusion_transformer
+    action_dim: 7
+    action_horizon: 32
+    execution_horizon: 8
+    diffusion_steps: 100
+    inference_steps: 10
+    hidden_dim: 256
+    layers: 8
+    heads: 8
+  language_dim: 384
+  proprio_dim: 8
+  model_version: v10
+  benchmark_version: robotwin_v4
+  stage1_arch: v10_spatial_skill
+  v9: null
+  v10:
+    dictionary_size: 15
+    dictionary_dim: 100
+    semantic_dim: 256
+    skill_encoder_dim: 256
+    skill_encoder_temperature: 1.0
+    future_horizon: 1
+    future_target_offset: 32
+    future_tail_mode: last_frame
+    future_decoder_dim: 256
+    future_decoder_depth: 2
+    future_decoder_heads: 8
+    future_decoder_ffn_dim: 1024
+    selector_heads: 8
+    grid_size: 16
+    ema_target_decay: 0.99
+    lambda_orth_max: 0.01
+    orth_warmup_steps: 5000
+    lambda_dict_rescue: 0.0001
+    dictionary_usage_ema_beta: 0.99
+    dictionary_usage_min_ratio: 0.1
+    dictionary_snapshot_interval: 1000
+    router_dim: 256
+    router_heads: 8
+    router_temperature: 1.0
+    router_norm_eps: 1.0e-08
+    entmax_start_step: 10000
+    entmax_full_step: 20000
+    router_usage_ema_beta: 0.99
+    router_usage_min_ratio: 0.1
+    lambda_router_rescue: 0.0001
+    gripper_mode: continuous_diffusion
+    gripper_hysteresis: false
+    gripper_open_threshold: 0.6
+    gripper_close_threshold: 0.4
+    contextualizer_depth: 2
+    language_conditioning: film
+    final_normalization: layer_norm_no_affine
+    camera_views: 1
+    grid_shape:
+    - 18
+    - 23
+data:
+  adapter: robotwin_motif20_v4
+  data_root: ${ROBOTWIN_DATA_ROOT}
+  task_config: demo_clean
+  embodiment: aloha_agilex
+  max_episodes_per_task: 50
+  manifest: metadata/robotwin/manifest.jsonl
+  norm_stats: metadata/robotwin/norm_stats.json
+  language_cache: metadata/robotwin/language_embeddings.npz
+  proprio_dim: 8
+  proprio_stats: null
+  batch_size: 128
+  augment: false
+  debug_episodes_per_task: null
+  tasks:
+  - move_can_pot
+  - move_pillbottle_pad
+  - move_playingcard_away
+  - place_container_plate
+  - place_empty_cup
+  - place_fan
+  - place_mouse_pad
+  - place_object_scale
+  - place_shoe
+  - beat_block_hammer
+  - click_alarmclock
+  - click_bell
+  - press_stapler
+  - stamp_seal
+  - turn_switch
+  - dump_bin_bigbin
+  - open_microwave
+  - rotate_qrcode
+  - shake_bottle
+  - shake_bottle_horizontally
+  anchor_weights: null
+  image_size:
+  - 320
+  - 240
+  cameras:
+  - head
+  normalization: global_minmax_no_clip
+  action_tail_mode: repeat_last
+  sampling: uniform_processed_frames
+train:
+  seed: 42
+  device: cuda
+  amp: true
+  learning_rate: 5.0e-05
+  weight_decay: 0.0
+  grad_clip: 1.0
+  batch_size: 128
+  gradient_accumulation_steps: 1
+  num_workers: 2
+  cpu_threads: 2
+  output_dir: outputs/stage1
+  resume: null
+  stage1_checkpoint: null
+  ema_decay: 0.999
+  warmup_steps: 1000
+  lr_schedule: cosine
+  min_lr_ratio: 0.1
+  max_steps: 100000
+  checkpoint_every_steps: 5000
+  log_every: 10
+  selector_health_interval: 100
+  dino_frame_batch_size: 16
+  selector_probe_size: 128
+  selector_probe_interval: 5000
+  selector_probe_batch_size: 2
+  steps_per_epoch: 1000
+  stage1_auto_freeze_selector_at_step: null
+  stage1_freeze_selector_at_step: null
+environment:
+  benchmark: robotwin
+  task_config: demo_clean
+  embodiment: aloha_agilex
+  action_type: qpos
+  action_representation: absolute_6_joint_angles_gripper
+  active_arm: from_episode_or_rollout_setup
+  success_metric: simulator_rollout_success_rate
+  action_smoothing:
+    type: bspline
+    degree: 3
+    num_ctrl_pts: 8
+experiment_provenance:
+  protocol: robotwin_motif20_v4_single_arm_joint_head_native_minmax
+  dynamics: predicted_spatial_transition_t32
+  architecture: v10_spatial_film_final_layer_norm
+  reference_project: https://github.com/teee000/LiLa-WAM
+  reference_commit: 339860f65d5cde9e229c037b672889bc4f70497c
+  future_timeline: cleaned_frames_t_plus_32_clamp_last

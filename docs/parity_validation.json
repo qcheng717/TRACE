@@ -1,0 +1,7 @@
+{
+  "state_tensors": 283,
+  "initial_state_exact": true,
+  "stage1_loss_exact": true,
+  "policy_loss_exact": true,
+  "policy_actions_exact": true
+}

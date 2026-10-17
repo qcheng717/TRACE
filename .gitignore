@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+models/*
+!models/.gitkeep
+third_party/*
+!third_party/.gitkeep
+metadata/robotwin/*
+!metadata/robotwin/.gitkeep
+outputs/
+runtime/
+*.pt
+*.hdf5
+*.npz
+.env

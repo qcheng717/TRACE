@@ -1,0 +1,28 @@
+{
+  "repo": "facebook/dinov2-base",
+  "revision": "f9e44c814b77203eaa57a6bdbbd535f21ede1415",
+  "path": "models/dinov2-base",
+  "transport": "http",
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 3047,
+      "sha256": "a25f88d48fa60f0c82a6573285ce4f01d60411c986b2de03feb68cf65480eb18"
+    },
+    {
+      "file": "config.json",
+      "bytes": 548,
+      "sha256": "f7ff4cfa73d2f70647dbf6950541ad25d73082d54c2e7e9bded160c7656b2a70"
+    },
+    {
+      "file": "model.safetensors",
+      "bytes": 346345912,
+      "sha256": "d73036b56966966d07975d696bde331762f37297e2f095de8cea0040c3aa0841"
+    },
+    {
+      "file": "preprocessor_config.json",
+      "bytes": 436,
+      "sha256": "14e780d86fa1861f8751f868d7f45425b5feb55c38ca26f152ca5097ab30f828"
+    }
+  ]
+}

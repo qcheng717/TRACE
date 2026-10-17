@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+TRACE_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+export ROBOTWIN_ROOT="${ROBOTWIN_ROOT:-$TRACE_ROOT/third_party/RoboTwin}"
+export ROBOTWIN_DATA_ROOT="${ROBOTWIN_DATA_ROOT:-$ROBOTWIN_ROOT/data}"
+export PYTHONPATH="$TRACE_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-2}"
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-2}"
+export PYTHONUNBUFFERED=1
+cd "$TRACE_ROOT"

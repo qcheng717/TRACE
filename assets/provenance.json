@@ -1,0 +1,31 @@
+{
+  "checkpoint": "robotwin_v4_policy_s1_frozen20k_7gpu_b128_20261005_201447/step_100000.pt",
+  "checkpoint_sha256": "4e309102792c951f102e8d219777df7b30b7c30104cf9990362e6c9eed0c7f06",
+  "selection": "Three selected successful rollouts, not an aggregate benchmark result.",
+  "examples": [
+    {
+      "task": "open_microwave",
+      "seed": 100000,
+      "success": true,
+      "steps": 197,
+      "source": "outputs/robotwin_v4/eval_policy_100k_20261006_094516/open_microwave/episode_100000.mp4",
+      "video_sha256": "0f038c96683557474be6fdf26c81684bc157bb40ea504391829a608a711ad49b"
+    },
+    {
+      "task": "click_bell",
+      "seed": 100000,
+      "success": true,
+      "steps": 55,
+      "source": "outputs/robotwin_v4/eval_policy_100k_20261006_094516/click_bell/episode_100000.mp4",
+      "video_sha256": "2d8d44d5943e395848c5e605073654dcddb328d11c547b584188bcd7b40a8e69"
+    },
+    {
+      "task": "place_container_plate",
+      "seed": 100000,
+      "success": true,
+      "steps": 126,
+      "source": "outputs/robotwin_v4/eval_policy_100k_20261006_094516/place_container_plate/episode_100000.mp4",
+      "video_sha256": "2f950541dde753360796cae235439d8fe0f10e3b280ccc358e9e25efdab4f224"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+extends: stage1.yaml
+train:
+  output_dir: outputs/policy
+  stage1_checkpoint: outputs/stage1/step_020000.pt

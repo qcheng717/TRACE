@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trace-robotwin"
+version = "0.1.0"
+description = "TRACE: task-conditioned visual abstraction and predictive skill dictionaries for RoboTwin"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.4", "numpy>=1.24", "PyYAML>=6", "h5py>=3.8", "scipy>=1.10", "transformers>=4.40,<5", "sentence-transformers>=3,<4", "matplotlib>=3.7", "Pillow>=9", "opencv-python>=4.8", "huggingface-hub>=0.25"]
+
+[project.optional-dependencies]
+visualization = ["scikit-learn>=1.5", "umap-learn>=0.5"]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

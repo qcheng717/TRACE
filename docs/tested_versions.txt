@@ -1,0 +1,14 @@
+# Versions in the validation environment; simulator is installed separately.
+torch==2.5.1+cu121
+numpy==1.26.4
+PyYAML==6.0.2
+h5py==3.14.0
+scipy==1.15.3
+transformers==4.44.2
+sentence-transformers==3.4.1
+matplotlib==3.9.4
+Pillow==12.3.0
+opencv-python==4.10.0.84
+huggingface-hub==0.28.1
+scikit-learn==1.7.2
+pytest==8.3.5
