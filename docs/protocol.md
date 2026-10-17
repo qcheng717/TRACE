@@ -1,4 +1,4 @@
-# RoboTwin V4 protocol
+# RoboTwin training and evaluation protocol
 
 | Component | Setting |
 |---|---|
@@ -30,8 +30,8 @@ Stationary runs are detected on both arms' 14D joint/gripper actions with maximu
 
 The source files already use `state[t+1] == action[t]` for recorded joints; do not shift the labels a second time. Cleaned frame indices apply to all fields. Thus a cleaned t+32 interval may span more than 32 original frames.
 
-The historical prepared set contains 968 episodes and 128,147 frames after filtering (978 single-arm episodes before joint-outlier filtering). Dataset revisions or different accepted episodes may change these counts.
+The prepared training set contains 968 episodes and 128,147 frames after filtering (978 single-arm episodes before joint-outlier filtering). Dataset revisions or different accepted episodes may change these counts.
 
 ## What this release does not claim
 
-The model is trained on all retained demonstrations. Training loss or an attractive t-SNE plot does not establish held-out generalization. Included successful videos are qualitative examples. Evaluation uses official expert feasibility and arm selection, and filters scenes outside single-arm scope. The newly downloaded `open_laptop` task is not one of the 20 training tasks.
+The model is trained on all retained demonstrations. Training loss  does not establish held-out generalization. Included successful videos are qualitative examples. Evaluation uses official expert feasibility and arm selection, and filters scenes outside single-arm scope. The `open_laptop` task is not one of the 20 training tasks.

@@ -4,7 +4,7 @@
 
 **Task-conditioned visual abstraction and predictive skill dictionary learning for robot manipulation.**
 
-This repository is a compact implementation of our RoboTwin V4 experiment. TRACE uses language to fuse multi-layer visual features, represents each spatial patch with a shared skill dictionary, and predicts future feature changes. A second-stage diffusion policy uses the frozen representation and a learned skill router to generate actions.
+TRACE is a framework for multi-task robot manipulation that uses language to fuse multi-layer visual features, represents each spatial patch with a shared skill dictionary, and predicts future feature changes. A second-stage diffusion policy uses the frozen representation and a learned skill router to generate actions.
 
 ## Selected successful rollouts
 
@@ -13,7 +13,7 @@ This repository is a compact implementation of our RoboTwin V4 experiment. TRACE
 | ![Open microwave](assets/open_microwave.gif) | ![Click bell](assets/click_bell.gif) | ![Place container](assets/place_container_plate.gif) |
 | [MP4](assets/open_microwave.mp4) | [MP4](assets/click_bell.mp4) | [MP4](assets/place_container_plate.mp4) |
 
-These are three selected successful simulator rollouts from the V4 100K policy, not aggregate success rates. See [media provenance](assets/provenance.json).
+These are three selected successful simulator rollouts from a policy trained for 100K updates, not aggregate success rates. See [media provenance](assets/provenance.json).
 
 ## Method
 
@@ -43,12 +43,12 @@ Stage I learns the dictionary and transition predictor against **EMA target feat
 Use Python 3.10 in a dedicated training environment. Install a PyTorch build compatible with your GPU, then:
 
 ```bash
-pip install -e '.[visualization,dev]'
+pip install -e '.[dev]'
 bash scripts/setup_robotwin.sh
 python tools/download_models.py
 ```
 
-The encoder downloader pins and verifies the original DINOv2-base and `all-MiniLM-L6-v2` weights. Model weights, datasets and simulator assets are not bundled. `HF_ENDPOINT=https://hf-mirror.com` can optionally select a mirror.
+The encoder downloader pins and verifies the DINOv2-base and `all-MiniLM-L6-v2` weights. Model weights, datasets and simulator assets are not bundled. `HF_ENDPOINT=https://hf-mirror.com` can optionally select a mirror.
 
 RoboTwin simulation requires its own packages, assets and motion planner. Follow the pinned checkout's [installation instructions](https://robotwin-platform.github.io/doc/usage/robotwin-install.html). Training and simulation may use separate Python environments; see [evaluation](#evaluation).
 
@@ -69,14 +69,14 @@ Preparation audits the active arm, excludes bimanual/ambiguous episodes and inva
 
 ## Training
 
-The complete V4 recipe uses 7 GPUs, batch 128 per GPU, accumulation 1:
+The default training configuration uses 7 GPUs with batch size 128 per GPU and one gradient accumulation step:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1,2,3,5,6,7 TRACE_NPROC=7 TRACE_BATCH=128 \
 TRACE_RUN=outputs/trace_robotwin bash scripts/train_two_stage.sh
 ```
 
-This runs **Stage I 10K → freeze both selectors → continue to 20K → Stage II 100K**. Each phase writes its own log and saves checkpoints every 5K updates. The 10K continuation preserves optimizer state and the original 100K learning-rate schedule. Fewer GPUs or a smaller batch can be selected using `TRACE_NPROC` and `TRACE_BATCH`; that changes the global batch and is not the identical experiment.
+This runs **Stage I 10K → freeze both selectors → continue to 20K → Stage II 100K**. Each phase writes its own log and saves checkpoints every 5K updates. The 10K continuation preserves optimizer state and the configured 100K learning-rate schedule. Fewer GPUs or a smaller batch can be selected using `TRACE_NPROC` and `TRACE_BATCH`; that changes the global batch and changes the training conditions.
 
 For Stage I only:
 
@@ -101,22 +101,7 @@ Add `--tasks open_microwave click_bell` for a subset, or `--gpus 0 1 2` for scen
 
 **Evaluation scope:** the official expert checks scene feasibility and determines the active arm. This is a single-arm policy with an expert-selected arm, not learned arm selection or unrestricted bimanual control. Results are conditional on accepted scenes. The driver isolates each scene in a fresh process to release renderer resources.
 
-The training config retains execution horizon 8; the historical 100K evaluation and the command above explicitly use **16**. Keep this override consistent when comparing checkpoints.
-
-## Visualization
-
-```bash
-python tools/visualize_prediction.py \
-  --checkpoint outputs/trace_robotwin/stage1/step_020000.pt \
-  --device cuda:0 --output outputs/prediction_gallery
-
-python tools/visualize_latents.py \
-  --checkpoint outputs/trace_robotwin/stage1/step_020000.pt \
-  --samples-per-task 500 --batch-size 2 --pool-grid 4 \
-  --device cuda:0 --output outputs/latent_gallery
-```
-
-Open the resulting `index.html`. Prediction galleries compare predicted **features**, not generated RGB. Latent plots use actual extracted features; task labels only determine colors.
+The policy configuration defaults to execution horizon 8; the evaluation command above explicitly uses **16**. Keep this override consistent when comparing checkpoints.
 
 ## Repository layout
 
@@ -124,13 +109,13 @@ Open the resulting `index.html`. Prediction galleries compare predicted **featur
 src/trace_robotwin/   model, dataset, losses, checkpoint and action processing
 configs/             standalone Stage-I/II configuration
 scripts/             portable training, evaluation and preparation launchers
-tools/               data audit, visualization and isolated simulator driver
+tools/               data preparation and isolated simulator driver
 tests/               protocol and model tests
 assets/              selected successful rollouts with provenance
 docs/                protocol, encoder revisions and validation records
 ```
 
-The public Python package is `trace_robotwin`. Serialized configuration tags `v10` / `robotwin_v4` are retained for existing checkpoint compatibility; old experiment implementations are not included. Existing checkpoints retain the same tensor names, but may require local model/data path migration before use.
+The Python package is `trace_robotwin`.
 
 ## Validation and attribution
 
@@ -138,7 +123,7 @@ The public Python package is `trace_robotwin`. Serialized configuration tags `v1
 pytest -q
 ```
 
-The extraction was checked against the original implementation for exact initialization, Stage-I/II loss and action-sampling parity using a small deterministic test backbone. Data preparation was also compared with the original V4 manifest and statistics. See [validation](docs/validation.md).
+Tests cover action normalization, temporal padding, spatial attention, two-stage training and action postprocessing. See [validation](docs/validation.md) for the scope of the checks.
 
 Built with [RoboTwin](https://github.com/RoboTwin-Platform/RoboTwin), [DINOv2](https://github.com/facebookresearch/dinov2), and [Sentence Transformers](https://github.com/UKPLab/sentence-transformers). Data cleaning, min/max normalization and B-spline postprocessing follow the protocol referenced from [LiLa-WAM](https://github.com/teee000/LiLa-WAM). See [third-party notices](THIRD_PARTY_NOTICES.md).
 

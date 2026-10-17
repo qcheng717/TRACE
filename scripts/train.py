@@ -35,20 +35,6 @@ def resolve_config(path,overrides):
     return c
 
 
-def snapshot(model,out,step,batch=None):
-    folder=out/'dictionary';folder.mkdir(exist_ok=True)
-    snapshot_path=folder/f'dictionary_snapshot_step{step:06d}.pt'
-    torch.save(dict(D_raw=model.predictor.dictionary.detach().cpu(),D_normalized=model.predictor.normalized_dictionary().detach().cpu(),
-        usage_ema=model.usage_ema.cpu(),step=step),snapshot_path)
-    sys.path.insert(0,str(ROOT/'tools'))
-    from visualize_dictionary import draw
-    draw('snapshot',[snapshot_path],folder)
-    if model.stage=='policy' and hasattr(model,'local_basis_diagnostic'):
-        torch.save(dict(D_star=model.predictor.normalized_dictionary().cpu(),D_local=model.local_basis_diagnostic[:4].cpu(),step=step,
-            metadata={k:(v[-len(model.local_basis_diagnostic):][:4].tolist() if torch.is_tensor(v) else v[-len(model.local_basis_diagnostic):][:4]) for k,v in batch.get('metadata',{}).items()} if batch else None,segment=batch['segment'][-len(model.local_basis_diagnostic):][:4] if batch else None,
-            anchor=batch['anchor'][-len(model.local_basis_diagnostic):][:4] if batch else None),folder/f'global_local_step{step:06d}.pt')
-
-
 def main():
     p=argparse.ArgumentParser(__doc__);p.add_argument('--config',required=True);p.add_argument('--stage',choices=['stage1','policy'],required=True)
     p.add_argument('--set',action='append',default=[])
@@ -91,9 +77,9 @@ def main():
                     raise ValueError('Resume training parameter changed: '+key)
             model.load_state_dict(resume['model'],strict=True);model.step=resume['step'];provenance=resume['provenance']
         elif t.get('finetune_checkpoint'):
-            raise ValueError('V10 requires its own Stage-I transfer, not legacy fine-tuning')
+            raise ValueError('Use Stage-I checkpoint transfer for policy initialization')
         elif a.stage=='policy':
-            if not t.get('stage1_checkpoint'):raise ValueError('Policy requires new V10 Stage-I checkpoint')
+            if not t.get('stage1_checkpoint'):raise ValueError('Policy requires a Stage-I checkpoint')
             provenance=transfer_stage1(model,t['stage1_checkpoint'],c)
         model.backbone.frame_batch_size=t.get('dino_frame_batch_size',model.backbone.frame_batch_size)
         if model.backbone.frame_batch_size<1:raise ValueError('Positive DINO frame batch required')
@@ -131,12 +117,12 @@ def main():
         if c['data']['adapter']=='robotwin_motif20_v4':
             from trace_robotwin.data.dataset import RoboTwinDataset
             dataset=RoboTwinDataset(c,a.stage,start_step=model.step,end_step=end_step)
-        else:raise ValueError('Only RoboTwin V4 is supported')
+        else:raise ValueError('Only the RoboTwin dataset adapter is supported')
         loader=DataLoader(dataset,batch_size=micro*accum,num_workers=t['num_workers'],pin_memory=device.type=='cuda',
             generator=torch.Generator().manual_seed(t['seed']),
             **({'multiprocessing_context':'spawn','prefetch_factor':1} if t['num_workers'] else {}))
         if rank==0:
-            (out/'config.json').write_text(json.dumps(c,indent=2));snapshot(model,out,model.step)
+            (out/'config.json').write_text(json.dumps(c,indent=2))
             print(f'{c["model"]["benchmark_version"]} {a.stage} micro={micro} accumulation={accum} global={micro*accum*world}',flush=True)
         if model.selector_frozen:print(f'Online and target selectors frozen at step {freeze_at if freeze_at is not None else auto_freeze_at}; target EMA disabled; optimizer/RNG/LR continued',flush=True)
         spatial_low_streak=0
@@ -231,7 +217,6 @@ def main():
                 if rank==0:
                     with (out/'metrics.jsonl').open('a') as f:f.write(json.dumps(row)+'\n')
                     print(json.dumps(row),flush=True)
-            if rank==0 and (step%c['model']['v10']['dictionary_snapshot_interval']==0 or step==end_step):snapshot(model,out,step,full)
             if step%t['checkpoint_every_steps']==0 or step==end_step:
                 rng=dict(python=random.getstate(),numpy=np.random.get_state(),torch=torch.get_rng_state(),cuda=torch.cuda.get_rng_state(device) if device.type=='cuda' else None)
                 states=[None]*world

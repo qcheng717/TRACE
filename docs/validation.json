@@ -18,5 +18,11 @@
   "python_compile": "passed",
   "simulator_rollout": "Not rerun from this extracted release",
   "fresh_environment_install": "Not executed; tests used the existing training environment",
-  "wheel_build": "passed (no dependency installation)"
+  "wheel_build": "passed (no dependency installation)",
+  "entry_points": "Training/evaluation help; visualization entry points removed",
+  "visualization_removed_checks": {
+    "unit_tests_passed": 6,
+    "unit_tests_skipped": 1,
+    "training_help": "passed"
+  }
 }

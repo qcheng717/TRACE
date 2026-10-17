@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Exact V4 recipe: 10K -> freeze selectors -> 20K -> policy 100K.
+# Two-stage training: 10K -> freeze selectors -> 20K -> policy 100K.
 set -euo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/env.sh"
 RUN="${TRACE_RUN:-outputs/trace_$(date +%Y%m%d_%H%M%S)}"
